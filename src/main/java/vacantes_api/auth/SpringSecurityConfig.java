@@ -82,7 +82,9 @@ public class SpringSecurityConfig {
                         // role_empresa
                         .requestMatchers(HttpMethod.GET, "/solicitudes/vacante/{idVacante}")
                         .hasAuthority("ROLE_EMPRESA")
-                        .requestMatchers(HttpMethod.PUT, "/solicitudes/adjudicar/{id}", "/solicitudes/desadjudicar/{id}")
+                        .requestMatchers(HttpMethod.PUT,
+                                "/solicitudes/adjudicar/{id}",
+                                "/solicitudes/desadjudicar/{id}")
                         .hasAuthority("ROLE_EMPRESA")
 
                         // USUARIO
