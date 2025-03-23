@@ -49,6 +49,15 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
 
                         // CATEGORIA
+                        .requestMatchers(HttpMethod.GET,
+                                "/categorias",
+                                "/categorias/{id}",
+                                "/categorias/buscar/{nombre}")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/categorias").hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.PUT, "/categorias/{id}").hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.DELETE, "/categorias/{id}").hasAuthority("ROLE_ADMON")
 
                         // EMPRESA
 

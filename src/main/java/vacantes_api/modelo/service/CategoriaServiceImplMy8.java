@@ -1,6 +1,6 @@
 package vacantes_api.modelo.service;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ public class CategoriaServiceImplMy8 extends GenericoCRUDServiceImplMy8<Categori
     }
 
     @Override
-    public Optional<Categoria> findByName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByName'");
+    public List<Categoria> findByName(String name) {
+        return categoriaRepository.findByNombreContainingIgnoreCase(name);
     }
+
 }
