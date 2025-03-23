@@ -59,11 +59,22 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/categorias/{id}").hasAuthority("ROLE_ADMON")
                         .requestMatchers(HttpMethod.DELETE, "/categorias/{id}").hasAuthority("ROLE_ADMON")
 
+                        // VACANTE
+                        .requestMatchers(HttpMethod.GET,
+                                "/vacantes",
+                                "/vacantes/{id}",
+                                "/vacantes/buscar/{nombre}",
+                                "/vacantes/categoria/{idCategoria}")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/vacantes").hasAuthority("ROLE_EMPRESA")
+                        .requestMatchers(HttpMethod.PUT, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
+                        .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
+                    
                         // EMPRESA
 
                         // SOLICITUD
 
-                        // VACANTE
 
                         // USUARIO
 
