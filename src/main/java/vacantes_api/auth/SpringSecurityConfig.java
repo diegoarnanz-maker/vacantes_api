@@ -2,6 +2,7 @@ package vacantes_api.auth;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -40,20 +41,22 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
-                //Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER", "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
+                        // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
+                        // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
                         // AUTHORIZATION
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        // .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
 
-                        //CATEGORIA
+                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
 
-                        //EMPRESA
+                        // CATEGORIA
 
-                        //SOLICITUD
+                        // EMPRESA
 
-                        //VACANTE
+                        // SOLICITUD
 
-                        //USUARIO
+                        // VACANTE
+
+                        // USUARIO
 
                         .anyRequest().authenticated())
 

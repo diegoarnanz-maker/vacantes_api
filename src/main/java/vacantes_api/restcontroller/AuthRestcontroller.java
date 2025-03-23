@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import vacantes_api.modelo.dto.LoginRequestDTO;
 import vacantes_api.modelo.dto.LoginResponseDTO;
+import vacantes_api.modelo.dto.RegisterRequestDTO;
+import vacantes_api.modelo.dto.UsuarioResponseDTO;
 import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.service.IUsuarioService;
 
@@ -41,7 +44,7 @@ public class AuthRestcontroller {
 
         LoginResponseDTO response = modelMapper.map(user, LoginResponseDTO.class);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(200).body(response);
     }
 
     @PostMapping("/logout")
@@ -50,7 +53,25 @@ public class AuthRestcontroller {
         return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
     }
 
-    // @PostMapping("/register")
-    // @GetMapping("/me")
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
+        Usuario user = usuarioService.register(dto);
+
+        // Opcional, muchas apps lo utilizan para mejorar UX
+        var authToken = new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+        //
+
+        LoginResponseDTO response = modelMapper.map(user, LoginResponseDTO.class);
+        return ResponseEntity.status(201).body(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> me() {
+        Usuario user = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UsuarioResponseDTO dto = modelMapper.map(user, UsuarioResponseDTO.class);
+        return ResponseEntity.status(200).body(dto);
+    }
 
 }

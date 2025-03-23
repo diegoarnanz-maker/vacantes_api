@@ -1,14 +1,20 @@
 package vacantes_api.modelo.dto;
 
+import java.time.LocalDate;
+
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginResponseDTO {
+public class UsuarioResponseDTO {
 
     private String email;
     private String nombre;
+    private String apellidos;
     private String rol;
+    private Integer enabled;
+    private LocalDate fechaRegistro;
+
 }

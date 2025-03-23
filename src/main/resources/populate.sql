@@ -8,9 +8,9 @@ INSERT INTO Categorias (nombre, descripcion) VALUES
 
 -- USUARIOS
 INSERT INTO Usuarios (email, nombre, apellidos, password, enabled, fecha_Registro, rol) VALUES
-('admin@email.com', 'Ana', 'Administradora', '$2a$10$Dow1bYupDArN8XwTfAMK9.FZlDdkXvnTPh9n9I9RIwOY4tvRqt7CW', 1, CURDATE(), 'ADMON'),
-('empresa@email.com', 'Carlos', 'Empresa S.L.', '$2a$10$Dow1bYupDArN8XwTfAMK9.FZlDdkXvnTPh9n9I9RIwOY4tvRqt7CW', 1, CURDATE(), 'EMPRESA'),
-('cliente@email.com', 'Laura', 'Gómez', '$2a$10$Dow1bYupDArN8XwTfAMK9.FZlDdkXvnTPh9n9I9RIwOY4tvRqt7CW', 1, CURDATE(), 'CLIENTE');
+('admin@email.com', 'Ana', 'Administradora', '$2a$10$jPCn3SqKcjddmKovqdlIxeMoyOmOsEzFtUSXcqHz.mEhRsJCW9ACW', 1, CURDATE(), 'ADMON'),
+('empresa@email.com', 'Carlos', 'Empresa S.L.', '$2a$10$jPCn3SqKcjddmKovqdlIxeMoyOmOsEzFtUSXcqHz.mEhRsJCW9ACW', 1, CURDATE(), 'EMPRESA'),
+('cliente@email.com', 'Laura', 'Gómez', '$2a$10$jPCn3SqKcjddmKovqdlIxeMoyOmOsEzFtUSXcqHz.mEhRsJCW9ACW', 1, CURDATE(), 'CLIENTE');
 
 -- EMPRESA (vinculada al usuario "empresa@email.com")
 INSERT INTO Empresas (cif, nombre_empresa, direccion_fiscal, pais, email) VALUES
