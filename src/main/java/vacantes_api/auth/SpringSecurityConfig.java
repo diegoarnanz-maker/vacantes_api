@@ -2,7 +2,6 @@ package vacantes_api.auth;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -70,11 +69,21 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/vacantes").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.PUT, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
-                    
+
                         // EMPRESA
 
                         // SOLICITUD
+                        // role_user
+                        .requestMatchers(HttpMethod.GET, "/solicitudes/mis-solicitudes").hasAuthority("ROLE_CLIENTE")
 
+                        .requestMatchers(HttpMethod.POST, "/solicitudes").hasAuthority("ROLE_CLIENTE")
+                        .requestMatchers(HttpMethod.DELETE, "/solicitudes/{id}").hasAuthority("ROLE_CLIENTE")
+
+                        // role_empresa
+                        .requestMatchers(HttpMethod.GET, "/solicitudes/vacante/{idVacante}")
+                        .hasAuthority("ROLE_EMPRESA")
+                        .requestMatchers(HttpMethod.PUT, "/solicitudes/adjudicar/{id}", "/solicitudes/desadjudicar/{id}")
+                        .hasAuthority("ROLE_EMPRESA")
 
                         // USUARIO
 

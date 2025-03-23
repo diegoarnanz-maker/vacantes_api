@@ -35,7 +35,7 @@ public class Vacante implements Serializable {
     private Double salario;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estatus", nullable = false, columnDefinition = "ENUM('CREADA','CUBIERTA','CANCELADA')")
+    @Column(nullable = false, columnDefinition = "ENUM('CREADA','CUBIERTA','CANCELADA')")
     private Estatus estatus;
 
     @Column(nullable = false)

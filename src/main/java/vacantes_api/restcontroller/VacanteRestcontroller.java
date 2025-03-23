@@ -71,6 +71,8 @@ public class VacanteRestcontroller {
         return ResponseEntity.status(200).body(response);
     }
 
+    //Los usuarios pueden buscar vacantes de empleo utilizando filtros como empresas, tipo de contrato, categoría. Solo verán aquellas vacantes que están en estado “CREADA”.
+
     @GetMapping("/buscar/{nombre}")
     public ResponseEntity<List<VacanteResponseDTO>> findByNombre(@PathVariable String nombre) {
 
@@ -170,6 +172,7 @@ public class VacanteRestcontroller {
         return ResponseEntity.status(200).body(response);
     }
 
+    //MODIFICAR ELIMINAR, NO SE ELIMINAN SINO QUE SE CAMBIA EL ESTATUS A CANCELADA
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Integer id) {

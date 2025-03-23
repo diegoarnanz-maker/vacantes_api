@@ -5,7 +5,9 @@ import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import vacantes_api.modelo.dto.SolicitudResponseDTO;
 import vacantes_api.modelo.dto.VacanteResponseDTO;
+import vacantes_api.modelo.entity.Solicitud;
 import vacantes_api.modelo.entity.Vacante;
 
 @Configuration
@@ -24,6 +26,18 @@ public class ModelMapperConfig {
 
                 map().setIdEmpresa(source.getEmpresa().getIdEmpresa());
                 map().setNombreEmpresa(source.getEmpresa().getNombreEmpresa());
+            }
+        });
+
+        // Mapeo personalizado de Solicitud → SolicitudResponseDTO
+        modelMapper.addMappings(new PropertyMap<Solicitud, SolicitudResponseDTO>() {
+            @Override
+            protected void configure() {
+                map().setIdVacante(source.getVacante().getIdVacante());
+                map().setNombreVacante(source.getVacante().getNombre());
+
+                map().setEmailUsuario(source.getUsuario().getEmail());
+                map().setNombreUsuario(source.getUsuario().getNombre());
             }
         });
 
