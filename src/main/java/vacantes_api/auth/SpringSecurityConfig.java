@@ -103,7 +103,19 @@ public class SpringSecurityConfig {
                         .hasAuthority("ROLE_EMPRESA")
 
                         // USUARIO
+                        .requestMatchers(HttpMethod.GET, 
+                                "/usuarios", 
+                                "/usuarios/{id}",
+                                "/usuarios/buscar/nombre/{nombre}",
+                                "/usuarios/buscar/rol/{rol}",
+                                "/usuarios/buscar/estado/{estado}")
+                                .hasAuthority("ROLE_ADMON")
 
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/usuarios/{id}",
+                                "/desactivar/{id}",
+                                "/activar/{id}")
+                                .hasAuthority("ROLE_ADMON")
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

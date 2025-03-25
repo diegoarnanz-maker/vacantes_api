@@ -16,7 +16,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Usuario implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 1L;
