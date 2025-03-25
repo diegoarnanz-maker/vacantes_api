@@ -53,8 +53,16 @@ public class EmpresaServiceImplMy8 extends GenericoCRUDServiceImplMy8<Empresa, I
     }
 
     @Override
-    public void deleteEmpresa(Integer id) {
-        //CONSULTAR
+    public void setEstadoUsuarioEmpresa(Integer idEmpresa, Integer estado) {
+        Empresa empresa = empresaRepository.findById(idEmpresa)
+                .orElseThrow(() -> new IllegalArgumentException("Empresa no encontrada con id: " + idEmpresa));
+
+        Usuario usuario = empresa.getUsuario();
+        usuario.setEnabled(estado);
+
+        empresaRepository.save(empresa);
     }
+
+    
 
 }

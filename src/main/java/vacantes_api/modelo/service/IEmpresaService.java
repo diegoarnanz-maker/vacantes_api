@@ -12,7 +12,8 @@ public interface IEmpresaService extends IGenericoCRUD<Empresa, Integer> {
 
     Empresa updateEmpresa(Integer id, EmpresaRegisterRequestDTO dto);
 
-    void deleteEmpresa(Integer id);
+    // Desactivar/activar el usuario role_empresa relacionado con esa empresa para qu eno pueda iniciar
+    void setEstadoUsuarioEmpresa(Integer idEmpresa, Integer estado);
 
     Optional<Empresa> findByUsuarioEmail(String email);
 

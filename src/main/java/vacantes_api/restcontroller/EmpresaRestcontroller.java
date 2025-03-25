@@ -32,98 +32,109 @@ import vacantes_api.modelo.service.IUsuarioService;
 @RequestMapping("/empresas")
 public class EmpresaRestcontroller {
 
-    @Autowired
-    private IEmpresaService empresaService;
+        @Autowired
+        private IEmpresaService empresaService;
 
-    @Autowired
-    private IUsuarioService usuarioService;
+        @Autowired
+        private IUsuarioService usuarioService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+        @Autowired
+        private ModelMapper modelMapper;
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> registerEmpresa(@RequestBody @Valid EmpresaRegisterRequestDTO dto) {
+        @PostMapping("/register")
+        public ResponseEntity<Map<String, Object>> registerEmpresa(@RequestBody @Valid EmpresaRegisterRequestDTO dto) {
 
-        UsuarioPasswordDTO datos = usuarioService.registerEmpresa(dto);
+                UsuarioPasswordDTO datos = usuarioService.registerEmpresa(dto);
 
-        Empresa empresa = empresaService.registerEmpresa(dto, datos.getUsuario());
+                Empresa empresa = empresaService.registerEmpresa(dto, datos.getUsuario());
 
-        EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
+                EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
 
-        // Mapear vacantes manualmente porque model mapper no puede mapear listas
+                // Mapear vacantes manualmente porque model mapper no puede mapear listas
 
-        // Previene error si empresa.getVacantes() es null (porque no se ha
-        // inicializado)
-        response.setVacantes(
-                empresa.getVacantes() != null
-                        ? empresa.getVacantes().stream()
-                                .map(v -> modelMapper.map(v, VacanteResponseDTO.class))
-                                .toList()
-                        : List.of() // lista vacía para cuando se registre salga como [] y no null
-        );
+                // Previene error si empresa.getVacantes() es null (porque no se ha
+                // inicializado)
+                response.setVacantes(
+                                empresa.getVacantes() != null
+                                                ? empresa.getVacantes().stream()
+                                                                .map(v -> modelMapper.map(v, VacanteResponseDTO.class))
+                                                                .toList()
+                                                : List.of() // lista vacía para cuando se registre salga como [] y no
+                                                            // null
+                );
 
-        return ResponseEntity.status(201).body(
-                Map.of(
-                        "empresa", response,
-                        "passwordGenerada", datos.getPasswordGenerada()));
-    }
+                return ResponseEntity.status(201).body(
+                                Map.of(
+                                                "empresa", response,
+                                                "passwordGenerada", datos.getPasswordGenerada()));
+        }
 
-    @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMON')")
-    public ResponseEntity<List<EmpresaResponseDTO>> listarEmpresas() {
-        List<EmpresaResponseDTO> response = empresaService.findAll().stream()
-                .map(empresa -> {
-                    EmpresaResponseDTO dto = modelMapper.map(empresa, EmpresaResponseDTO.class);
-                    // Si hay vacantes, las mapeo; si no, devuelvo []
-                    dto.setVacantes(
-                            Optional.ofNullable(empresa.getVacantes())
-                                    .orElse(List.of())
-                                    .stream()
-                                    .map(vacante -> modelMapper.map(vacante, VacanteResponseDTO.class))
-                                    .toList());
-                    return dto;
-                })
-                .toList();
+        @GetMapping
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<List<EmpresaResponseDTO>> listarEmpresas() {
+                List<EmpresaResponseDTO> response = empresaService.findAll().stream()
+                                .map(empresa -> {
+                                        EmpresaResponseDTO dto = modelMapper.map(empresa, EmpresaResponseDTO.class);
+                                        // Si hay vacantes, las mapeo; si no, devuelvo []
+                                        dto.setVacantes(
+                                                        Optional.ofNullable(empresa.getVacantes())
+                                                                        .orElse(List.of())
+                                                                        .stream()
+                                                                        .map(vacante -> modelMapper.map(vacante,
+                                                                                        VacanteResponseDTO.class))
+                                                                        .toList());
+                                        return dto;
+                                })
+                                .toList();
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMON')")
-    public ResponseEntity<EmpresaResponseDTO> findById(@PathVariable Integer id) {
-        Empresa empresa = empresaService.read(id)
-                .orElseThrow(() -> new RuntimeException("Empresa con id " + id + " no encontrada"));
-        EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
-        response.setVacantes(
-                Optional.ofNullable(empresa.getVacantes())
-                        .orElse(List.of())
-                        .stream()
-                        .map(vacante -> modelMapper.map(vacante, VacanteResponseDTO.class))
-                        .toList());
-        return ResponseEntity.ok(response);
-    }
+        @GetMapping("/{id}")
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<EmpresaResponseDTO> findById(@PathVariable Integer id) {
+                Empresa empresa = empresaService.read(id)
+                                .orElseThrow(() -> new RuntimeException("Empresa con id " + id + " no encontrada"));
+                EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
+                response.setVacantes(
+                                Optional.ofNullable(empresa.getVacantes())
+                                                .orElse(List.of())
+                                                .stream()
+                                                .map(vacante -> modelMapper.map(vacante, VacanteResponseDTO.class))
+                                                .toList());
+                return ResponseEntity.ok(response);
+        }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMON')")
-    public ResponseEntity<EmpresaResponseDTO> update(@PathVariable Integer id,
-            @RequestBody @Valid EmpresaRegisterRequestDTO dto) {
-        Empresa empresa = empresaService.updateEmpresa(id, dto);
-        EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
-        response.setVacantes(
-                Optional.ofNullable(empresa.getVacantes())
-                        .orElse(List.of())
-                        .stream()
-                        .map(vacante -> modelMapper.map(vacante, VacanteResponseDTO.class))
-                        .toList());
-        return ResponseEntity.ok(response);
-    }
+        @PutMapping("/{id}")
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<EmpresaResponseDTO> update(@PathVariable Integer id,
+                        @RequestBody @Valid EmpresaRegisterRequestDTO dto) {
+                Empresa empresa = empresaService.updateEmpresa(id, dto);
+                EmpresaResponseDTO response = modelMapper.map(empresa, EmpresaResponseDTO.class);
+                response.setVacantes(
+                                Optional.ofNullable(empresa.getVacantes())
+                                                .orElse(List.of())
+                                                .stream()
+                                                .map(vacante -> modelMapper.map(vacante, VacanteResponseDTO.class))
+                                                .toList());
+                return ResponseEntity.ok(response);
+        }
 
-    //NO IMPLEMMENTADO EL DELETEEMPRESA, HAY QUE VER SI QUEREMOS QUE SI SE ELIMINE EMPRESA SE ELIMINE EL USUARIO O SE MARQUE SOLO COMO ENABLED = 0
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMON')")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        empresaService.deleteEmpresa(id);
-        return ResponseEntity.noContent().build();
-    }
+        // La entidad empresa no se elimina para evitar problemas de integridad
+        // referencial, pero marcamos como inactivo el usuario vinculado. Por lo que ya
+        // no podra volver a iniciar sesion
+        @PutMapping("/desactivar/{id}")
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<Map<String, String>> desactivarEmpresa(@PathVariable Integer id) {
+                empresaService.setEstadoUsuarioEmpresa(id, 0);
+                return ResponseEntity.ok(Map.of("message", "Empresa desactivada correctamente"));
+        }
+
+        @PutMapping("/activar/{id}")
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<Map<String, String>> activarEmpresa(@PathVariable Integer id) {
+                empresaService.setEstadoUsuarioEmpresa(id, 1);
+                return ResponseEntity.ok(Map.of("message", "Empresa activada correctamente"));
+        }
 
 }

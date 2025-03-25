@@ -79,7 +79,12 @@ public class SpringSecurityConfig {
                                 )
                                 .hasAuthority("ROLE_ADMON")
                         .requestMatchers(HttpMethod.POST, "/empresas/register").hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.PUT, "/empresas/{id}").hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/empresas/{id}",
+                                "/desactivar/{id}",
+                                "/activar/{id}"
+                                )
+                                .hasAuthority("ROLE_ADMON")
                         .requestMatchers(HttpMethod.DELETE, "/empresas/{id}").hasAuthority("ROLE_ADMON")
 
                         // SOLICITUD
