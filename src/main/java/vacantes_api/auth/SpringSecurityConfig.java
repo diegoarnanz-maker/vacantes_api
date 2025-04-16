@@ -40,6 +40,14 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // SWAGGER
+                        .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html"
+                        ).permitAll()
+    
                         // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
                         // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
                         // AUTHORIZATION

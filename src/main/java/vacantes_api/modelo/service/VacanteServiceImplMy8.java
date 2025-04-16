@@ -29,4 +29,9 @@ public class VacanteServiceImplMy8 extends GenericoCRUDServiceImplMy8<Vacante, I
         return vacanteRepository.findByCategoriaIdCategoria(idCategoria);
     }
 
+    @Override
+    public List<Vacante> findBySalario(Double salario) {
+        return vacanteRepository.findBySalarioGreaterThanEqual(salario);
+    }
+
 }
