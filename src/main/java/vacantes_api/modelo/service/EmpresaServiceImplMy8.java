@@ -63,6 +63,5 @@ public class EmpresaServiceImplMy8 extends GenericoCRUDServiceImplMy8<Empresa, I
         empresaRepository.save(empresa);
     }
 
-    
 
 }

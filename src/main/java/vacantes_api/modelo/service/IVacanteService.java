@@ -12,4 +12,6 @@ public interface IVacanteService extends IGenericoCRUD<Vacante, Integer> {
     
     List<Vacante> findByCategoriaId(Integer idCategoria);
 
+    List<Vacante> findBySalario(Double salario);
+
 }

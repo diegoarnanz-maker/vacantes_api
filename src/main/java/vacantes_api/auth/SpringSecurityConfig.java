@@ -40,6 +40,14 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // SWAGGER
+                        .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html"
+                        ).permitAll()
+    
                         // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
                         // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
                         // AUTHORIZATION
@@ -103,7 +111,19 @@ public class SpringSecurityConfig {
                         .hasAuthority("ROLE_EMPRESA")
 
                         // USUARIO
+                        .requestMatchers(HttpMethod.GET, 
+                                "/usuarios", 
+                                "/usuarios/{id}",
+                                "/usuarios/buscar/nombre/{nombre}",
+                                "/usuarios/buscar/rol/{rol}",
+                                "/usuarios/buscar/estado/{estado}")
+                                .hasAuthority("ROLE_ADMON")
 
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/usuarios/{id}",
+                                "/desactivar/{id}",
+                                "/activar/{id}")
+                                .hasAuthority("ROLE_ADMON")
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

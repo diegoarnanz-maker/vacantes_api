@@ -12,4 +12,6 @@ public interface IVacanteRepository extends JpaRepository<Vacante, Integer> {
 
     List<Vacante> findByCategoriaIdCategoria(Integer idCategoria);
 
+    List<Vacante> findBySalarioGreaterThanEqual(Double salario);
+
 }

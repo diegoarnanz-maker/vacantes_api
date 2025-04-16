@@ -56,21 +56,18 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
     }
 
     @Override
-    public Optional<Usuario> findByUsername(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByUsername'");
-    }
-
-    @Override
-    public Optional<Usuario> findByEmail(String email) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByEmail'");
+    public List<Usuario> findByNombre(String nombre) {
+        return usuarioRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
     @Override
     public List<Usuario> findByRol(String rol) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByRol'");
+        return usuarioRepository.findByRol(rol);
+    }
+
+    @Override
+    public List<Usuario> findByEstado(Integer estado) {
+        return usuarioRepository.findByEnabled(estado);
     }
 
     // Nunca indicamos si el usuario no existe o si la contraseña es incorrecta,
@@ -91,8 +88,14 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return user;
     }
 
+    // Hacemos una sobrecarga del metodo register para poder registrar un usuario
+    // con rol CLIENTE o admon/empresa
     @Override
     public Usuario register(RegisterRequestDTO dto) {
+        return this.register(dto, "CLIENTE");
+    }
+
+    public Usuario register(RegisterRequestDTO dto, String rol) {
         if (usuarioRepository.existsById(dto.getEmail())) {
             throw new IllegalArgumentException("El email ya está registrado.");
         }
@@ -104,7 +107,7 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .enabled(1)
                 .fechaRegistro(LocalDate.now())
-                .rol("CLIENTE") // por defecto cuando te registras eres un cliente
+                .rol(rol)
                 .build();
 
         return usuarioRepository.save(user);
@@ -122,7 +125,8 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return user;
     }
 
-    // Usamos transacciones para evitar que si falla una de las operaciones, la otra no se cree y de problemas de integridad.
+    // Usamos transacciones para evitar que si falla una de las operaciones, la otra
+    // no se cree y de problemas de integridad.
     // Si falla la creacion del usuario, no se creara la empresa y viceversa.
     @Override
     @Transactional
@@ -145,12 +149,23 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
 
         usuarioRepository.save(user);
 
-        //Hemos creado un dto para que el controlador pueda devolver la contraseña generada antes de ser encriptada y poder enviarsela al usuario empresa para que pueda acceder a su cuenta.
+        // Hemos creado un dto para que el controlador pueda devolver la contraseña
+        // generada antes de ser encriptada y poder enviarsela al usuario empresa para
+        // que pueda acceder a su cuenta.
         // Se podria hacer logica para que se le enviase esta contraseña por email.
         return UsuarioPasswordDTO.builder()
                 .usuario(user)
                 .passwordGenerada(rawPassword)
                 .build();
+    }
+
+    @Override
+    public void cambiarEstadoUsuario(String email, Integer nuevoEstado) {
+        Usuario usuario = usuarioRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setEnabled(nuevoEstado);
+        usuarioRepository.save(usuario);
     }
 
 }

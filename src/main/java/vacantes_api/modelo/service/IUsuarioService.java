@@ -1,7 +1,6 @@
 package vacantes_api.modelo.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import vacantes_api.modelo.dto.EmpresaRegisterRequestDTO;
 import vacantes_api.modelo.dto.RegisterRequestDTO;
@@ -14,12 +13,14 @@ public interface IUsuarioService extends IGenericoCRUD<Usuario, String> {
 
     Usuario register(RegisterRequestDTO dto);
 
+    void cambiarEstadoUsuario(String email, Integer nuevoEstado);
+
     UsuarioPasswordDTO registerEmpresa(EmpresaRegisterRequestDTO dto);
 
-    Optional<Usuario> findByUsername(String username);
-
-    Optional<Usuario> findByEmail(String email);
+    List<Usuario> findByNombre(String nombre);
 
     List<Usuario> findByRol(String rol);
+
+    List<Usuario> findByEstado(Integer estado);
 
 }
