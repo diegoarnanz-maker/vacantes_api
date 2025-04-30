@@ -40,6 +40,14 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // SWAGGER
+                        .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html"
+                        ).permitAll()
+    
                         // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
                         // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
                         // AUTHORIZATION
@@ -58,19 +66,39 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/categorias/{id}").hasAuthority("ROLE_ADMON")
                         .requestMatchers(HttpMethod.DELETE, "/categorias/{id}").hasAuthority("ROLE_ADMON")
 
-                        // VACANTE
+                        // VACANTE // Se han añadido las rutas necesarias para hacer búsquedas en vacantes
                         .requestMatchers(HttpMethod.GET,
                                 "/vacantes",
                                 "/vacantes/{id}",
                                 "/vacantes/buscar/{nombre}",
-                                "/vacantes/categoria/{idCategoria}")
+                                "/vacantes/categoria/{idCategoria}",
+                                "/vacantes/categoria/{idCategoria}",
+                                "/vacantes/salario/{salario}",
+                                "/vacantes/empresa/{nombre}")
+                        
                         .permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/vacantes").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.PUT, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
-
+                        .requestMatchers(HttpMethod.GET, "/vacantes/propias").hasAuthority("ROLE_EMPRESA")
+                        
                         // EMPRESA
+                        // role_admon
+                        .requestMatchers(HttpMethod.GET, 
+                                "/empresas",
+                                "/empresas/{id}",
+                                "/empresas/buscar/{nombre}"
+                                )
+                                .hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.POST, "/empresas/register").hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/empresas/{id}",
+                                "/desactivar/{id}",
+                                "/activar/{id}"
+                                )
+                                .hasAuthority("ROLE_ADMON")
+                        .requestMatchers(HttpMethod.DELETE, "/empresas/{id}").hasAuthority("ROLE_ADMON")
 
                         // SOLICITUD
                         // role_user
@@ -88,7 +116,19 @@ public class SpringSecurityConfig {
                         .hasAuthority("ROLE_EMPRESA")
 
                         // USUARIO
+                        .requestMatchers(HttpMethod.GET, 
+                                "/usuarios", 
+                                "/usuarios/{id}",
+                                "/usuarios/buscar/nombre/{nombre}",
+                                "/usuarios/buscar/rol/{rol}",
+                                "/usuarios/buscar/estado/{estado}")
+                                .hasAuthority("ROLE_ADMON")
 
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/usuarios/{id}",
+                                "/desactivar/{id}",
+                                "/activar/{id}")
+                                .hasAuthority("ROLE_ADMON")
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -9,12 +9,16 @@ import vacantes_api.modelo.entity.Vacante;
 
 public interface ISolicitudService extends IGenericoCRUD<Solicitud, Integer> {
 
-    Optional<Solicitud> findByNombre(String nombre);
 
     List<Solicitud> findByUsuarioEmail(String email);
 
     Optional<Solicitud> findByVacanteAndUsuario(Vacante vacante, Usuario usuario);
 
     List<Solicitud> findByVacante(Vacante vacante);
-
+    
+    void deleteByVacanteId(int vacanteId);
+    
+    void adjudicarSolicitud(int idSolicitud);
+    
+    void rechazarSolicitud(int idSolicitud);
 }

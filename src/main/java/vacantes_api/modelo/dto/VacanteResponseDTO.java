@@ -35,4 +35,5 @@ public class VacanteResponseDTO {
 
     private Integer idEmpresa;
     private String nombreEmpresa;
+    private String pais;
 }
