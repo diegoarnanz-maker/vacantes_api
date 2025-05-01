@@ -17,6 +17,8 @@ public interface IUsuarioService extends IGenericoCRUD<Usuario, String> {
 
     UsuarioPasswordDTO registerEmpresa(EmpresaRegisterRequestDTO dto);
 
+    Usuario findByEmail(String email);
+
     List<Usuario> findByNombre(String nombre);
 
     List<Usuario> findByRol(String rol);

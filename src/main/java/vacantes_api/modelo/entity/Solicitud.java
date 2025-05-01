@@ -30,9 +30,10 @@ public class Solicitud implements Serializable {
     @Column(length = 2000)
     private String comentarios;
 
+    @Builder.Default //Permite que el valor por defecto de estado sea 0, si no se indica el valor por defecto será null 
     @Column(nullable = false)
-    private Integer estado = 0;
-
+    private Integer estado = 0;  
+    
     @Column(length = 45)
     private String curriculum;
 

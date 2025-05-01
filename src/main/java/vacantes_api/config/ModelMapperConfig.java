@@ -30,6 +30,7 @@ public class ModelMapperConfig {
 
                 map().setIdEmpresa(source.getEmpresa().getIdEmpresa());
                 map().setNombreEmpresa(source.getEmpresa().getNombreEmpresa());
+                map().setPais(source.getEmpresa().getPais());
             }
         });
 
@@ -39,9 +40,25 @@ public class ModelMapperConfig {
             protected void configure() {
                 map().setIdVacante(source.getVacante().getIdVacante());
                 map().setNombreVacante(source.getVacante().getNombre());
+                map().setDescripcionVacante(source.getVacante().getDescripcion());
+                map().setSalarioVacante(source.getVacante().getSalario());
+                map().setDetalleVacante(source.getVacante().getDetalles());
+                map().setImagenVacante(source.getVacante().getImagen());
+                map().setNombreEmpresa(source.getVacante().getEmpresa().getNombreEmpresa());
+                map().setCategoriaVacante(source.getVacante().getCategoria().getNombre());
 
                 map().setEmailUsuario(source.getUsuario().getEmail());
                 map().setNombreUsuario(source.getUsuario().getNombre());
+                map().setApellidosUsuario(source.getUsuario().getApellidos());           }
+        });
+
+        // Mapeo personalizado de Empresa → EmpresaResponseDTO
+        modelMapper.addMappings(new PropertyMap<Empresa, EmpresaResponseDTO>() {
+            @Override
+            protected void configure() {
+                map().setEmail(source.getUsuario().getEmail());
+                map().setNombre(source.getUsuario().getNombre());
+                map().setApellidos(source.getUsuario().getApellidos());
             }
         });
 

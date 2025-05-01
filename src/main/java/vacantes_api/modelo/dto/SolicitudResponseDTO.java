@@ -25,8 +25,16 @@ public class SolicitudResponseDTO {
     // Información de la vacante
     private Integer idVacante;
     private String nombreVacante;
+    private String descripcionVacante;
+    private double salarioVacante;
+    private String detalleVacante;
+    private String imagenVacante;
+    private String nombreEmpresa;
+    private String categoriaVacante;
 
     // Información del usuario solicitante
     private String emailUsuario;
     private String nombreUsuario;
+    private String apellidosUsuario;
+    
 }

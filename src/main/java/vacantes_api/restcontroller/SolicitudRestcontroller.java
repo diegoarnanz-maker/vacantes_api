@@ -45,6 +45,19 @@ public class SolicitudRestcontroller {
     @Autowired
     private IVacanteService vacanteService;
 
+    
+    @GetMapping("/{id}")  
+    public ResponseEntity<SolicitudResponseDTO> findById(@PathVariable Integer id) {
+
+        Solicitud solicitud = solicitudService.read(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        SolicitudResponseDTO response = modelMapper.map(solicitud, SolicitudResponseDTO.class);
+
+        return ResponseEntity.status(200).body(response);
+    }
+    
+    
     // Enpoints para la cliente
 
     @PreAuthorize("hasAuthority('ROLE_CLIENTE')")
@@ -167,10 +180,9 @@ public class SolicitudRestcontroller {
         if (solicitud.getEstado() == 1) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "La solicitud ya fue adjudicada anteriormente");
-        }
-
-        solicitud.setEstado(1);
-        solicitudService.update(solicitud);
+        }   
+        
+        solicitudService.adjudicarSolicitud(id);
 
         return ResponseEntity.ok(Map.of(
                 "message", "Solicitud adjudicada correctamente",
@@ -181,9 +193,9 @@ public class SolicitudRestcontroller {
 
     // Podria darse a la empresa la opcion de cancelar la adjudicacion por si se
     // equivoca con @PutMapping("/desadjudicar/{id}"). Lo dejamos para probar y poder quitar-poner la adjudicacion
-    @PutMapping("/desadjudicar/{id}")
+    @PutMapping("/rechazar/{id}")
     @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
-    public ResponseEntity<Map<String, String>> desadjudicarSolicitud(@PathVariable Integer id) {
+    public ResponseEntity<Map<String, String>> rechazarSolicitud(@PathVariable Integer id) {
         Usuario empresaUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Solicitud solicitud = solicitudService.read(id)
@@ -193,15 +205,14 @@ public class SolicitudRestcontroller {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para modificar esta solicitud");
         }
 
-        if (solicitud.getEstado() == 0) {
+        if (solicitud.getEstado() == 2) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "La solicitud ya no está adjudicada");
         }
 
-        solicitud.setEstado(0);
-        solicitudService.update(solicitud);
+        solicitudService.rechazarSolicitud(id);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Adjudicación retirada correctamente",
+                "message", "Solicitud rechazada correctamente",
                 "nombreCandidato", solicitud.getUsuario().getNombre(),
                 "nombreVacante", solicitud.getVacante().getNombre()));
     }

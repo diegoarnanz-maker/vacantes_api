@@ -66,18 +66,23 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/categorias/{id}").hasAuthority("ROLE_ADMON")
                         .requestMatchers(HttpMethod.DELETE, "/categorias/{id}").hasAuthority("ROLE_ADMON")
 
-                        // VACANTE
+                        // VACANTE // Se han añadido las rutas necesarias para hacer búsquedas en vacantes
                         .requestMatchers(HttpMethod.GET,
                                 "/vacantes",
                                 "/vacantes/{id}",
                                 "/vacantes/buscar/{nombre}",
-                                "/vacantes/categoria/{idCategoria}")
+                                "/vacantes/categoria/{idCategoria}",
+                                "/vacantes/categoria/{idCategoria}",
+                                "/vacantes/salario/{salario}",
+                                "/vacantes/empresa/{nombre}")
+                        
                         .permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/vacantes").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.PUT, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
                         .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
-
+                        .requestMatchers(HttpMethod.GET, "/vacantes/propias").hasAuthority("ROLE_EMPRESA")
+                        
                         // EMPRESA
                         // role_admon
                         .requestMatchers(HttpMethod.GET, 

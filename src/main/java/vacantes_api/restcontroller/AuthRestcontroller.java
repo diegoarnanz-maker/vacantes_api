@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,11 +68,23 @@ public class AuthRestcontroller {
         return ResponseEntity.status(201).body(response);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/me1")
     public ResponseEntity<UsuarioResponseDTO> me() {
         Usuario user = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UsuarioResponseDTO dto = modelMapper.map(user, UsuarioResponseDTO.class);
         return ResponseEntity.status(200).body(dto);
+    }
+    
+    //CAMBIO SUGERIDO DEL MÉTODO ME (así si modificamos los datos del usuario authenticado cuando clique a Mi Perfil, estos saldrán actualizados.:
+    
+    @GetMapping("/me2)")
+    public ResponseEntity<UsuarioResponseDTO> me2(Authentication authentication) {
+    	String email = authentication.getName();
+    	Usuario user = usuarioService.findByEmail(email);
+    	
+    	UsuarioResponseDTO userDto = modelMapper.map(user, UsuarioResponseDTO.class);
+    	
+    	return ResponseEntity.status(200).body(userDto);
     }
 
 }

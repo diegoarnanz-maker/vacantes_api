@@ -59,8 +59,9 @@ public class VacanteRestcontroller {
 
         return ResponseEntity.status(200).body(response);
     }
-
-    @GetMapping("/{id}")
+    
+   
+     @GetMapping("/{id}")
     public ResponseEntity<VacanteResponseDTO> findById(@PathVariable Integer id) {
 
         Vacante vacante = vacanteService.read(id)
@@ -84,7 +85,8 @@ public class VacanteRestcontroller {
 
         return ResponseEntity.status(200).body(response);
     }
-
+    
+    /* NO hace falta
     @GetMapping("/categoria/{idCategoria}")
     public ResponseEntity<List<VacanteResponseDTO>> findByCategoria(@PathVariable Integer idCategoria) {
         List<Vacante> vacantes = vacanteService.findByCategoriaId(idCategoria);
@@ -95,6 +97,80 @@ public class VacanteRestcontroller {
 
         return ResponseEntity.status(200).body(response);
     }
+    */
+    
+   //Se añaden los 2 métodos que faltaban para las búsquedas: 
+    
+    @GetMapping("/categoria/{nombre}")
+    public ResponseEntity<List<VacanteResponseDTO>> findByCategoriaNombre(@PathVariable String nombre){
+    	
+    	List<Vacante> vacantes = vacanteService.findByCategoriaNombre(nombre);
+    	
+    	List<VacanteResponseDTO> response = vacantes.stream()
+    			.map(v-> modelMapper.map(v, VacanteResponseDTO.class))
+    			.toList();
+    	return ResponseEntity.status(200).body(response);
+    	
+    }
+    
+   @GetMapping("/empresa/{nombreEmpresa}") 
+   public ResponseEntity<List<VacanteResponseDTO>> findByEmpresaNombre(@PathVariable String nombreEmpresa){
+	   List<Vacante> vacantes = vacanteService.findByEmpresaNombreEmpresa(nombreEmpresa);
+	   
+	   List<VacanteResponseDTO> response = vacantes.stream()
+			   .map(v-> modelMapper.map(v, VacanteResponseDTO.class))
+			   .toList();
+	   return ResponseEntity.status(200).body(response);
+   }
+   
+   
+   //Método buscar por salario:
+   
+   
+   @GetMapping("/salario/{salario}")
+   public ResponseEntity<List<VacanteResponseDTO>> findBySalario(
+           @PathVariable Double salario) {
+
+       List<Vacante> vacantes = vacanteService.findBySalario(salario);
+       List<VacanteResponseDTO> dto = vacantes.stream()
+           .map(v -> modelMapper.map(v, VacanteResponseDTO.class))
+           .toList();
+
+       return ResponseEntity.ok(dto);
+   }
+   
+   //Método añadido para buscar vacante por estado: 		VALORAR SI ES NECESARIO
+   
+   /*@GetMapping("/estado/{estado}")
+   public ResponseEntity<List<VacanteResponseDTO>> findByEstado(
+           @PathVariable String estado) {
+       List<Vacante> vacantes = vacanteService.findByEstado(estado);
+       List<VacanteResponseDTO> dto = vacantes.stream()
+           .map(v -> modelMapper.map(v, VacanteResponseDTO.class))
+           .toList();
+       return ResponseEntity.ok(dto);
+   }*/
+   
+    
+   //Se añade el método para buscar todas las vacantes que pertenecen a la EMPRESA LOGEADA:
+   
+   @GetMapping("/propias")
+   public ResponseEntity<List<VacanteResponseDTO>> findVacantesPropias(){
+	   // Obtener el usuario autenticado
+       Usuario empresaUser = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+       // Obtener la empresa asociada a ese usuario
+       Empresa empresa = empresaService.findByUsuarioEmail(empresaUser.getEmail())
+               .orElseThrow(() -> new RuntimeException("Empresa no encontrada"));
+	   
+       List<Vacante> vacantesPropias = empresa.getVacantes();//Se adquiere la lista de vacantes asociadas a esa empresa
+       
+       List<VacanteResponseDTO> response = vacantesPropias.stream()
+    		   .map(v-> modelMapper.map(v, VacanteResponseDTO.class))
+    		   .toList();
+       return ResponseEntity.status(200).body(response);
+   }
+   
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
@@ -165,14 +241,14 @@ public class VacanteRestcontroller {
                 .categoria(categoria)
                 .build();
 
-        Vacante guardada = vacanteService.update(actualizada);
+        Vacante guardada = vacanteService.update(actualizada); //UPDATE sobreescrito en ServiceIMpl
 
         VacanteResponseDTO response = modelMapper.map(guardada, VacanteResponseDTO.class);
 
         return ResponseEntity.status(200).body(response);
     }
 
-    //MODIFICAR ELIMINAR, NO SE ELIMINAN SINO QUE SE CAMBIA EL ESTATUS A CANCELADA
+    //NO SE ELIMINAN SINO QUE SE CAMBIA EL ESTATUS A CANCELADA (método delete sobreescrito)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Integer id) {
@@ -187,10 +263,14 @@ public class VacanteRestcontroller {
         if (!vacante.getEmpresa().getIdEmpresa().equals(empresa.getIdEmpresa())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para eliminar esta vacante");
         }
+     
 
         vacanteService.delete(id);
 
         return ResponseEntity.status(200).body(Map.of("message", "Vacante eliminada correctamente"));
     }
+    
+    
+    
 
 }

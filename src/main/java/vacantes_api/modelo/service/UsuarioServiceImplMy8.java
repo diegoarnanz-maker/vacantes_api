@@ -3,8 +3,6 @@ package vacantes_api.modelo.service;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,6 +52,14 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
 
         return password.toString();
     }
+    
+    //AÑADIDO:
+    
+    @Override
+	public Usuario findByEmail(String email) {
+		return usuarioRepository.findById(email).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+	}
+    //-----------------
 
     @Override
     public List<Usuario> findByNombre(String nombre) {
