@@ -22,4 +22,6 @@ public interface IVacanteRepository extends JpaRepository<Vacante, Integer> {
     
    /* List<Vacante> findByEstado(String estado); VALORAR SI ES NECESARIO*/
 
+    List<Vacante> findBySalarioGreaterThanEqual(Double salario);
+
 }

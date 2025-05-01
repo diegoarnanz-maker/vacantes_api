@@ -174,6 +174,4 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         usuarioRepository.save(usuario);
     }
 
-	
-
 }

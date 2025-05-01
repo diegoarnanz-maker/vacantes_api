@@ -16,8 +16,8 @@ public interface IUsuarioService extends IGenericoCRUD<Usuario, String> {
     void cambiarEstadoUsuario(String email, Integer nuevoEstado);
 
     UsuarioPasswordDTO registerEmpresa(EmpresaRegisterRequestDTO dto);
-    
-    Usuario findByEmail(String email); //Añadido
+
+    Usuario findByEmail(String email);
 
     List<Usuario> findByNombre(String nombre);
 
