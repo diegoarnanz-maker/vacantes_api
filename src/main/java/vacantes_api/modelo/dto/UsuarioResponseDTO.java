@@ -16,5 +16,10 @@ public class UsuarioResponseDTO {
     private String rol;
     private Integer enabled;
     private LocalDate fechaRegistro;
+    
+    private String nombreEmpresa;
+    private String cifEmpresa;
+    private String direccionFiscal;
+    private String paisEmpresa;
 
 }

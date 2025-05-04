@@ -1,5 +1,7 @@
 package vacantes_api.config;
 
+import static org.modelmapper.Conditions.isNotNull;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
@@ -7,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 
 import vacantes_api.modelo.dto.EmpresaResponseDTO;
 import vacantes_api.modelo.dto.SolicitudResponseDTO;
+import vacantes_api.modelo.dto.UsuarioResponseDTO;
 import vacantes_api.modelo.dto.VacanteResponseDTO;
 import vacantes_api.modelo.entity.Empresa;
 import vacantes_api.modelo.entity.Solicitud;
+import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.entity.Vacante;
 
 // ModelMapperConfig.java
@@ -60,6 +64,25 @@ public class ModelMapperConfig {
                 map().setNombre(source.getUsuario().getNombre());
                 map().setApellidos(source.getUsuario().getApellidos());
             }
+        });
+        
+        //Usuario -> UsuarioResponseDTO
+        
+        modelMapper.addMappings(new PropertyMap<Usuario, UsuarioResponseDTO>() {
+            @Override
+            protected void configure() {
+            	
+            	  // Sólo mapear si la fuente (getEmpresa()) NO es null
+            	  when(isNotNull()).map(source.getEmpresa().getNombreEmpresa(),
+                       destination.getNombreEmpresa());
+                when(isNotNull()).map(source.getEmpresa().getCif(),
+                       destination.getCifEmpresa());
+                when(isNotNull()).map(source.getEmpresa().getDireccionFiscal(),
+                       destination.getDireccionFiscal());
+                when(isNotNull()).map(source.getEmpresa().getPais(),
+                       destination.getPaisEmpresa());
+              }
+            
         });
 
         return modelMapper;
