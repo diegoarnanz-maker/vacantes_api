@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,16 +72,14 @@ public class EmpresaRestcontroller {
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<List<EmpresaResponseDTO>> listarEmpresas() {
                 List<EmpresaResponseDTO> response = empresaService.findAll().stream()
+                                .filter(emp -> emp.getUsuario() != null && emp.getUsuario().getEnabled() == 1)
                                 .map(empresa -> {
                                         EmpresaResponseDTO dto = modelMapper.map(empresa, EmpresaResponseDTO.class);
-                                        // Si hay vacantes, las mapeo; si no, devuelvo []
-                                        dto.setVacantes(
-                                                        Optional.ofNullable(empresa.getVacantes())
-                                                                        .orElse(List.of())
-                                                                        .stream()
-                                                                        .map(vacante -> modelMapper.map(vacante,
-                                                                                        VacanteResponseDTO.class))
-                                                                        .toList());
+                                        dto.setVacantes(Optional.ofNullable(empresa.getVacantes())
+                                                        .orElse(List.of())
+                                                        .stream()
+                                                        .map(vac -> modelMapper.map(vac, VacanteResponseDTO.class))
+                                                        .toList());
                                         return dto;
                                 })
                                 .toList();
