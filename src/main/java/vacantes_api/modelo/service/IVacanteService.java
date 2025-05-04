@@ -21,6 +21,4 @@ public interface IVacanteService extends IGenericoCRUD<Vacante, Integer> {
     
     /*List<Vacante> findByEstado(String estado);  VALORAR SI ES NECESARIO*/ 
 
-    List<Vacante> findBySalario(Double salario);
-
 }

@@ -1,7 +1,5 @@
 package vacantes_api.config;
 
-import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +12,7 @@ import vacantes_api.modelo.entity.Empresa;
 import vacantes_api.modelo.entity.Solicitud;
 import vacantes_api.modelo.entity.Vacante;
 
+// ModelMapperConfig.java
 @Configuration
 public class ModelMapperConfig {
 
@@ -49,20 +48,11 @@ public class ModelMapperConfig {
 
                 map().setEmailUsuario(source.getUsuario().getEmail());
                 map().setNombreUsuario(source.getUsuario().getNombre());
-                map().setApellidosUsuario(source.getUsuario().getApellidos());           }
-        });
-
-        // Mapeo personalizado de Empresa → EmpresaResponseDTO
-        modelMapper.addMappings(new PropertyMap<Empresa, EmpresaResponseDTO>() {
-            @Override
-            protected void configure() {
-                map().setEmail(source.getUsuario().getEmail());
-                map().setNombre(source.getUsuario().getNombre());
-                map().setApellidos(source.getUsuario().getApellidos());
+                map().setApellidosUsuario(source.getUsuario().getApellidos());
             }
         });
 
-        // Mapeo personalizado de Empresa → EmpresaResponseDTO
+        // Empresa → EmpresaResponseDTO
         modelMapper.addMappings(new PropertyMap<Empresa, EmpresaResponseDTO>() {
             @Override
             protected void configure() {
