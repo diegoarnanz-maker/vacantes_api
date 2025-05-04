@@ -77,7 +77,7 @@ public class AuthRestcontroller {
     
     //CAMBIO SUGERIDO DEL MÉTODO ME (así si modificamos los datos del usuario authenticado cuando clique a Mi Perfil, estos saldrán actualizados.:
     
-    @GetMapping("/me2)")
+    @GetMapping("/me2")
     public ResponseEntity<UsuarioResponseDTO> me2(Authentication authentication) {
     	String email = authentication.getName();
     	Usuario user = usuarioService.findByEmail(email);
