@@ -38,6 +38,7 @@ public class Empresa implements Serializable {
     // email en la tabla Usuarios.
     @OneToOne
     @JoinColumn(name = "email", referencedColumnName = "email")
+    @ToString.Exclude
     private Usuario usuario;
 
     // Una empresa puede tener muchas vacantes.

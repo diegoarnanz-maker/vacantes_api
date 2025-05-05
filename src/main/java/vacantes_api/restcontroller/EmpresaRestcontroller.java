@@ -87,6 +87,25 @@ public class EmpresaRestcontroller {
                 return ResponseEntity.ok(response);
         }
 
+        @GetMapping("/desactivadas")
+        @PreAuthorize("hasAuthority('ROLE_ADMON')")
+        public ResponseEntity<List<EmpresaResponseDTO>> listarEmpresasDesactivadas() {
+                List<EmpresaResponseDTO> response = empresaService.findAll().stream()
+                                .filter(emp -> emp.getUsuario() != null && emp.getUsuario().getEnabled() == 0)
+                                .map(empresa -> {
+                                        EmpresaResponseDTO dto = modelMapper.map(empresa, EmpresaResponseDTO.class);
+                                        dto.setVacantes(Optional.ofNullable(empresa.getVacantes())
+                                                        .orElse(List.of())
+                                                        .stream()
+                                                        .map(vac -> modelMapper.map(vac, VacanteResponseDTO.class))
+                                                        .toList());
+                                        return dto;
+                                })
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
         @GetMapping("/{id}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<EmpresaResponseDTO> findById(@PathVariable Integer id) {

@@ -47,6 +47,7 @@ public class Usuario implements Serializable, UserDetails {
     // Relación inversa del @OneToOne que hay en la entidad Empresa.
     // La clave foránea está en la tabla Empresas (email), no en Usuarios.
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private Empresa empresa;
 
     // Un usuario puede tener muchas solicitudes (relación 1:N).

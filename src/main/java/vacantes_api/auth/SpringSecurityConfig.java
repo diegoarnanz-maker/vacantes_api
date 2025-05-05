@@ -22,132 +22,160 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+                        throws Exception {
+                return authenticationConfiguration.getAuthenticationManager();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(Customizer.withDefaults())
 
-                .authorizeHttpRequests(authorize -> authorize
+                                .authorizeHttpRequests(authorize -> authorize
 
-                        // SWAGGER
-                        .requestMatchers(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui.html"
-                        ).permitAll()
-    
-                        // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
-                        // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
-                        // AUTHORIZATION
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                                                // SWAGGER
+                                                .requestMatchers(
+                                                                "/swagger-ui/**",
+                                                                "/v3/api-docs/**",
+                                                                "/swagger-ui.html")
+                                                .permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+                                                // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
+                                                // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
+                                                // AUTHORIZATION
+                                                .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register")
+                                                .permitAll()
 
-                        // CATEGORIA
-                        .requestMatchers(HttpMethod.GET,
-                                "/categorias",
-                                "/categorias/{id}",
-                                "/categorias/buscar/{nombre}")
-                        .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/categorias").hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.PUT, "/categorias/{id}").hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.DELETE, "/categorias/{id}").hasAuthority("ROLE_ADMON")
+                                                // CATEGORIA
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/categorias",
+                                                                "/categorias/{id}",
+                                                                "/categorias/buscar/{nombre}")
+                                                .permitAll()
 
-                        // VACANTE // Se han añadido las rutas necesarias para hacer búsquedas en vacantes
-                        .requestMatchers(HttpMethod.GET,
-                                "/vacantes",
-                                "/vacantes/{id}",
-                                "/vacantes/buscar/{nombre}",
-                                "/vacantes/categoria/{idCategoria}",
-                                "/vacantes/categoria/{idCategoria}",
-                                "/vacantes/salario/{salario}",
-                                "/vacantes/empresa/{nombre}")
-                        
-                        .permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/categorias")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.PUT, "/categorias/{id}")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.DELETE, "/categorias/{id}")
+                                                .hasAuthority("ROLE_ADMON")
 
-                        .requestMatchers(HttpMethod.POST, "/vacantes").hasAuthority("ROLE_EMPRESA")
-                        .requestMatchers(HttpMethod.PUT, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
-                        .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}").hasAuthority("ROLE_EMPRESA")
-                        .requestMatchers(HttpMethod.GET, "/vacantes/propias").hasAuthority("ROLE_EMPRESA")
-                        
-                        // EMPRESA
-                        // role_admon
-                        .requestMatchers(HttpMethod.GET, 
-                                "/empresas",
-                                "/empresas/{id}",
-                                "/empresas/buscar/{nombre}"
-                                )
-                                .hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.POST, "/empresas/register").hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.PUT, 
-                                "/empresas/{id}",
-                                "/desactivar/{id}",
-                                "/activar/{id}"
-                                )
-                                .hasAuthority("ROLE_ADMON")
-                        .requestMatchers(HttpMethod.DELETE, "/empresas/{id}").hasAuthority("ROLE_ADMON")
+                                                // VACANTE // Se han añadido las rutas necesarias para hacer búsquedas
+                                                // en vacantes
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/vacantes",
+                                                                "/vacantes/{id}",
+                                                                "/vacantes/buscar/{nombre}",
+                                                                "/vacantes/categoria/{idCategoria}",
+                                                                "/vacantes/categoria/{idCategoria}",
+                                                                "/vacantes/salario/{salario}",
+                                                                "/vacantes/empresa/{nombre}")
 
-                        // SOLICITUD
-                        // role_user
-                        .requestMatchers(HttpMethod.GET, "/solicitudes/mis-solicitudes").hasAuthority("ROLE_CLIENTE")
+                                                .permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/solicitudes").hasAuthority("ROLE_CLIENTE")
-                        .requestMatchers(HttpMethod.DELETE, "/solicitudes/{id}").hasAuthority("ROLE_CLIENTE")
+                                                .requestMatchers(HttpMethod.POST, "/vacantes")
+                                                .hasAuthority("ROLE_EMPRESA")
+                                                .requestMatchers(HttpMethod.PUT, "/vacantes/{id}")
+                                                .hasAuthority("ROLE_EMPRESA")
+                                                .requestMatchers(HttpMethod.DELETE, "/vacantes/{id}")
+                                                .hasAuthority("ROLE_EMPRESA")
+                                                .requestMatchers(HttpMethod.GET, "/vacantes/propias")
+                                                .hasAuthority("ROLE_EMPRESA")
 
-                        // role_empresa
-                        .requestMatchers(HttpMethod.GET, "/solicitudes/vacante/{idVacante}")
-                        .hasAuthority("ROLE_EMPRESA")
-                        .requestMatchers(HttpMethod.PUT,
-                                "/solicitudes/adjudicar/{id}",
-                                "/solicitudes/desadjudicar/{id}")
-                        .hasAuthority("ROLE_EMPRESA")
+                                                // EMPRESA
+                                                // role_admon
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/empresas",
+                                                                "/empresas/{id}",
+                                                                "/empresas/buscar/{nombre}")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.POST, "/empresas/register")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.PUT,
+                                                                "/empresas/{id}",
+                                                                "/desactivar/{id}",
+                                                                "/activar/{id}")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.DELETE, "/empresas/{id}")
+                                                .hasAuthority("ROLE_ADMON")
+                                                .requestMatchers(HttpMethod.GET, "/empresas/desactivadas")
+                                                .hasAuthority("ROLE_ADMON")
 
-                        // USUARIO
-                        .requestMatchers(HttpMethod.GET, 
-                                "/usuarios", 
-                                "/usuarios/{id}",
-                                "/usuarios/buscar/nombre/{nombre}",
-                                "/usuarios/buscar/rol/{rol}",
-                                "/usuarios/buscar/estado/{estado}")
-                                .hasAuthority("ROLE_ADMON")
+                                                // SOLICITUD
+                                                // role_user
+                                                .requestMatchers(HttpMethod.GET, "/solicitudes/mis-solicitudes")
+                                                .hasAuthority("ROLE_CLIENTE")
 
-                        .requestMatchers(HttpMethod.PUT, 
-                                "/usuarios/{id}",
-                                "/desactivar/{id}",
-                                "/activar/{id}")
-                                .hasAuthority("ROLE_ADMON")
-                        .anyRequest().authenticated())
+                                                .requestMatchers(HttpMethod.POST, "/solicitudes")
+                                                .hasAuthority("ROLE_CLIENTE")
+                                                .requestMatchers(HttpMethod.DELETE, "/solicitudes/{id}")
+                                                .hasAuthority("ROLE_CLIENTE")
 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults());
+                                                // role_empresa
+                                                .requestMatchers(HttpMethod.GET, "/solicitudes/vacante/{idVacante}")
+                                                .hasAuthority("ROLE_EMPRESA")
+                                                .requestMatchers(HttpMethod.PUT,
+                                                                "/solicitudes/adjudicar/{id}",
+                                                                "/solicitudes/desadjudicar/{id}")
+                                                .hasAuthority("ROLE_EMPRESA")
 
-        return http.build();
-    }
+                                                // USUARIO
+                                                // ACTUALIZACIÓN DE PERFIL DEL USUARIO AUTENTICADO
+                                                .requestMatchers(HttpMethod.PUT,
+                                                                "/usuarios/perfil")
+                                                .authenticated()
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/usuarios",
+                                                                "/usuarios/{id}",
+                                                                "/usuarios/buscar/nombre/{nombre}",
+                                                                "/usuarios/buscar/rol/{rol}",
+                                                                "/usuarios/buscar/estado/{estado}")
+                                                .hasAuthority("ROLE_ADMON")
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+                                                .requestMatchers(HttpMethod.PUT,
+                                                                "/usuarios/{id}",
+                                                                "/usuarios/{email}",
+                                                                "/usuarios/desactivar/{id}",
+                                                                "/usuarios/activar/{id}")
+                                                .hasAuthority("ROLE_ADMON")
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                                                // DATOS DEL USUARIO AUTENTICADO
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/auth/me",
+                                                                "/auth/me1",
+                                                                "/auth/me2")
+                                                .authenticated()
+
+                                                .anyRequest().authenticated())
+
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .httpBasic(Customizer.withDefaults());
+
+                return http.build();
+        }
+
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+                configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+                configuration.setAllowCredentials(true);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
 }

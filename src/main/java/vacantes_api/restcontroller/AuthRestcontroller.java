@@ -74,17 +74,26 @@ public class AuthRestcontroller {
         UsuarioResponseDTO dto = modelMapper.map(user, UsuarioResponseDTO.class);
         return ResponseEntity.status(200).body(dto);
     }
-    
-    //CAMBIO SUGERIDO DEL MÉTODO ME (así si modificamos los datos del usuario authenticado cuando clique a Mi Perfil, estos saldrán actualizados.:
-    
+
+    // CAMBIO SUGERIDO DEL MÉTODO ME (así si modificamos los datos del usuario
+    // authenticado cuando clique a Mi Perfil, estos saldrán actualizados.:
+
     @GetMapping("/me2")
     public ResponseEntity<UsuarioResponseDTO> me2(Authentication authentication) {
-    	String email = authentication.getName();
-    	Usuario user = usuarioService.findByEmail(email);
-    	
-    	UsuarioResponseDTO userDto = modelMapper.map(user, UsuarioResponseDTO.class);
-    	
-    	return ResponseEntity.status(200).body(userDto);
+        String email = authentication.getName();
+        Usuario user = usuarioService.findByEmail(email);
+
+        UsuarioResponseDTO userDto = modelMapper.map(user, UsuarioResponseDTO.class);
+
+        return ResponseEntity.status(200).body(userDto);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> me(Authentication authentication) {
+        String email = authentication.getName();
+        Usuario user = usuarioService.findByEmail(email);
+        UsuarioResponseDTO userDto = modelMapper.map(user, UsuarioResponseDTO.class);
+        return ResponseEntity.ok(userDto);
     }
 
 }
