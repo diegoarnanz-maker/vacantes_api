@@ -149,6 +149,9 @@ public class SpringSecurityConfig {
                                                                 "/usuarios/activar/{id}")
                                                 .hasAuthority("ROLE_ADMON")
 
+                                                .requestMatchers(HttpMethod.PUT, "/usuarios/perfil/empresa")
+                                                .hasAuthority("ROLE_EMPRESA")
+
                                                 // DATOS DEL USUARIO AUTENTICADO
                                                 .requestMatchers(HttpMethod.GET,
                                                                 "/auth/me",

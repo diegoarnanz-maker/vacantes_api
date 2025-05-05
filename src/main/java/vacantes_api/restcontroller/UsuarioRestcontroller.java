@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import vacantes_api.modelo.dto.EmpresaPerfilUpdateDTO;
 import vacantes_api.modelo.dto.UsuarioPerfilUpdateDTO;
 import vacantes_api.modelo.dto.UsuarioRequestDTO;
 import vacantes_api.modelo.dto.UsuarioResponseDTO;
@@ -152,6 +153,32 @@ public class UsuarioRestcontroller {
 
                 UsuarioResponseDTO response = modelMapper.map(usuario, UsuarioResponseDTO.class);
                 return ResponseEntity.ok(response);
+        }
+
+        @PutMapping("/perfil/empresa")
+        @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
+        public ResponseEntity<Map<String, String>> actualizarPerfilEmpresa(
+                        @RequestBody @Valid EmpresaPerfilUpdateDTO dto,
+                        Authentication authentication) {
+
+                String email = authentication.getName();
+
+                Usuario usuario = usuarioService.read(email)
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                if (usuario.getEmpresa() == null) {
+                        throw new RuntimeException("No se encontró empresa asociada al usuario.");
+                }
+
+                usuario.getEmpresa().setNombreEmpresa(dto.getNombreEmpresa());
+                usuario.getEmpresa().setCif(dto.getCif());
+                usuario.getEmpresa().setDireccionFiscal(dto.getDireccionFiscal());
+                usuario.getEmpresa().setPais(dto.getPais());
+
+                usuarioService.update(usuario);
+
+                return ResponseEntity.ok(
+                                Map.of("message", "Perfil de empresa actualizado correctamente"));
         }
 
 }
