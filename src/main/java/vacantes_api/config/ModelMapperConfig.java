@@ -16,28 +16,41 @@ import vacantes_api.modelo.entity.Solicitud;
 import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.entity.Vacante;
 
-// ModelMapperConfig.java
+/**
+ * Clase de configuración de ModelMapper.
+ * Define los mapeos personalizados entre entidades y DTOs del sistema.
+ */
 @Configuration
 public class ModelMapperConfig {
 
+    /**
+     * Define el bean de {@link ModelMapper} con las reglas de mapeo personalizadas.
+     *
+     * @return instancia de ModelMapper con configuraciones específicas.
+     */
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        // Mapeo personalizado de Vacante → VacanteResponseDTO
+        /**
+         * Mapeo personalizado de Vacante → VacanteResponseDTO.
+         * Incluye campos de la entidad asociada Empresa y Categoria.
+         */
         modelMapper.addMappings(new PropertyMap<Vacante, VacanteResponseDTO>() {
             @Override
             protected void configure() {
                 map().setIdCategoria(source.getCategoria().getIdCategoria());
                 map().setNombreCategoria(source.getCategoria().getNombre());
-
                 map().setIdEmpresa(source.getEmpresa().getIdEmpresa());
                 map().setNombreEmpresa(source.getEmpresa().getNombreEmpresa());
                 map().setPais(source.getEmpresa().getPais());
             }
         });
 
-        // Mapeo personalizado de Solicitud → SolicitudResponseDTO
+        /**
+         * Mapeo personalizado de Solicitud → SolicitudResponseDTO.
+         * Incluye campos de la vacante y del usuario relacionados.
+         */
         modelMapper.addMappings(new PropertyMap<Solicitud, SolicitudResponseDTO>() {
             @Override
             protected void configure() {
@@ -56,7 +69,10 @@ public class ModelMapperConfig {
             }
         });
 
-        // Empresa → EmpresaResponseDTO
+        /**
+         * Mapeo personalizado de Empresa → EmpresaResponseDTO.
+         * Añade datos del usuario asociado a la empresa.
+         */
         modelMapper.addMappings(new PropertyMap<Empresa, EmpresaResponseDTO>() {
             @Override
             protected void configure() {
@@ -65,24 +81,19 @@ public class ModelMapperConfig {
                 map().setApellidos(source.getUsuario().getApellidos());
             }
         });
-        
-        //Usuario -> UsuarioResponseDTO
-        
+
+        /**
+         * Mapeo personalizado de Usuario → UsuarioResponseDTO.
+         * Incluye información de la empresa si está disponible.
+         */
         modelMapper.addMappings(new PropertyMap<Usuario, UsuarioResponseDTO>() {
             @Override
             protected void configure() {
-            	
-            	  // Sólo mapear si la fuente (getEmpresa()) NO es null
-            	  when(isNotNull()).map(source.getEmpresa().getNombreEmpresa(),
-                       destination.getNombreEmpresa());
-                when(isNotNull()).map(source.getEmpresa().getCif(),
-                       destination.getCifEmpresa());
-                when(isNotNull()).map(source.getEmpresa().getDireccionFiscal(),
-                       destination.getDireccionFiscal());
-                when(isNotNull()).map(source.getEmpresa().getPais(),
-                       destination.getPaisEmpresa());
-              }
-            
+                when(isNotNull()).map(source.getEmpresa().getNombreEmpresa(), destination.getNombreEmpresa());
+                when(isNotNull()).map(source.getEmpresa().getCif(), destination.getCifEmpresa());
+                when(isNotNull()).map(source.getEmpresa().getDireccionFiscal(), destination.getDireccionFiscal());
+                when(isNotNull()).map(source.getEmpresa().getPais(), destination.getPaisEmpresa());
+            }
         });
 
         return modelMapper;

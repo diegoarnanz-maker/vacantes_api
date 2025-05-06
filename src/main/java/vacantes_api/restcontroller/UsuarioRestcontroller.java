@@ -10,13 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import vacantes_api.modelo.dto.EmpresaPerfilUpdateDTO;
@@ -26,6 +20,9 @@ import vacantes_api.modelo.dto.UsuarioResponseDTO;
 import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.service.IUsuarioService;
 
+/**
+ * Controlador REST para la gestión de usuarios.
+ */
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/usuarios")
@@ -40,6 +37,11 @@ public class UsuarioRestcontroller {
         @Autowired
         private PasswordEncoder passwordEncoder;
 
+        /**
+         * Obtiene todos los usuarios del sistema. Solo accesible para administradores.
+         *
+         * @return Lista de usuarios.
+         */
         @GetMapping
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<List<UsuarioResponseDTO>> getUsuarios() {
@@ -50,6 +52,12 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.status(200).body(response);
         }
 
+        /**
+         * Obtiene un usuario por su email.
+         *
+         * @param email Email del usuario.
+         * @return Usuario correspondiente en formato DTO.
+         */
         @GetMapping("/{email}")
         public ResponseEntity<UsuarioResponseDTO> getUsuarioById(@PathVariable String email) {
                 Usuario usuario = usuarioService.read(email)
@@ -58,6 +66,12 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.status(200).body(response);
         }
 
+        /**
+         * Busca usuarios por nombre. Solo accesible para administradores.
+         *
+         * @param nombre Nombre del usuario.
+         * @return Lista de usuarios encontrados.
+         */
         @GetMapping("/buscar/nombre/{nombre}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<List<UsuarioResponseDTO>> buscarPorNombre(@PathVariable String nombre) {
@@ -67,6 +81,12 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.ok(usuarios);
         }
 
+        /**
+         * Busca usuarios por rol. Solo accesible para administradores.
+         *
+         * @param rol Rol del usuario.
+         * @return Lista de usuarios con el rol especificado.
+         */
         @GetMapping("/buscar/rol/{rol}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<List<UsuarioResponseDTO>> buscarPorRol(@PathVariable String rol) {
@@ -76,6 +96,13 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.ok(usuarios);
         }
 
+        /**
+         * Busca usuarios por su estado (activo/inactivo). Solo accesible para
+         * administradores.
+         *
+         * @param estado Estado del usuario (1 activo, 0 inactivo).
+         * @return Lista de usuarios con el estado especificado.
+         */
         @GetMapping("/buscar/estado/{estado}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<List<UsuarioResponseDTO>> buscarPorEstado(@PathVariable Integer estado) {
@@ -85,7 +112,15 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.ok(usuarios);
         }
 
-        // Update mas completo para cambiar rol/estado/password...
+        /**
+         * Actualiza completamente los datos de un usuario, incluyendo contraseña, rol y
+         * estado.
+         * Solo accesible para administradores.
+         *
+         * @param email Email del usuario a actualizar.
+         * @param dto   Datos nuevos del usuario.
+         * @return Usuario actualizado.
+         */
         @PutMapping("/{email}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<UsuarioResponseDTO> updateUsuario(
@@ -106,35 +141,47 @@ public class UsuarioRestcontroller {
                 }
 
                 Usuario actualizado = builder.build();
-
                 usuarioService.update(actualizado);
 
                 UsuarioResponseDTO response = modelMapper.map(actualizado, UsuarioResponseDTO.class);
-
                 return ResponseEntity.ok(response);
         }
 
-        // Updates directos para activar/desactivar usuario
+        /**
+         * Desactiva un usuario por su email. Solo accesible para administradores.
+         *
+         * @param email Email del usuario.
+         * @return Mensaje de confirmación.
+         */
         @PutMapping("/desactivar/{email}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<Map<String, String>> desactivarUsuario(@PathVariable String email) {
                 usuarioService.cambiarEstadoUsuario(email, 0);
                 return ResponseEntity.ok(
-                                Map.of(
-                                                "message", "Usuario desactivado por mal uso",
-                                                "email", email));
+                                Map.of("message", "Usuario desactivado por mal uso", "email", email));
         }
 
+        /**
+         * Activa un usuario por su email. Solo accesible para administradores.
+         *
+         * @param email Email del usuario.
+         * @return Mensaje de confirmación.
+         */
         @PutMapping("/activar/{email}")
         @PreAuthorize("hasAuthority('ROLE_ADMON')")
         public ResponseEntity<Map<String, String>> activarUsuario(@PathVariable String email) {
                 usuarioService.cambiarEstadoUsuario(email, 1);
                 return ResponseEntity.ok(
-                                Map.of(
-                                                "message", "Usuario activado correctamente",
-                                                "email", email));
+                                Map.of("message", "Usuario activado correctamente", "email", email));
         }
 
+        /**
+         * Permite a un usuario actualizar su propio perfil (nombre y apellidos).
+         *
+         * @param dto            Datos del perfil.
+         * @param authentication Objeto de autenticación con el email del usuario.
+         * @return Perfil actualizado.
+         */
         @PutMapping("/perfil")
         @PreAuthorize("isAuthenticated()")
         public ResponseEntity<UsuarioResponseDTO> actualizarPerfilUsuario(
@@ -155,6 +202,13 @@ public class UsuarioRestcontroller {
                 return ResponseEntity.ok(response);
         }
 
+        /**
+         * Permite a una empresa actualizar su perfil asociado.
+         *
+         * @param dto            Datos del perfil de la empresa.
+         * @param authentication Objeto de autenticación con el email del usuario.
+         * @return Mensaje de confirmación.
+         */
         @PutMapping("/perfil/empresa")
         @PreAuthorize("hasAuthority('ROLE_EMPRESA')")
         public ResponseEntity<Map<String, String>> actualizarPerfilEmpresa(
@@ -177,8 +231,6 @@ public class UsuarioRestcontroller {
 
                 usuarioService.update(usuario);
 
-                return ResponseEntity.ok(
-                                Map.of("message", "Perfil de empresa actualizado correctamente"));
+                return ResponseEntity.ok(Map.of("message", "Perfil de empresa actualizado correctamente"));
         }
-
 }

@@ -18,51 +18,67 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * Configuración general de seguridad para la API.
+ * Define los filtros de seguridad, autorización de rutas y política CORS.
+ */
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
+        /**
+         * Bean para codificar contraseñas utilizando BCrypt.
+         *
+         * @return instancia de PasswordEncoder.
+         */
         @Bean
         PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
 
+        /**
+         * Bean que proporciona el AuthenticationManager necesario para autenticación.
+         *
+         * @param authenticationConfiguration configuración de autenticación.
+         * @return AuthenticationManager configurado.
+         * @throws Exception si no puede crearse el gestor.
+         */
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
                         throws Exception {
                 return authenticationConfiguration.getAuthenticationManager();
         }
 
+        /**
+         * Configura la cadena de filtros de seguridad HTTP.
+         * Define rutas públicas, autenticadas y protegidas por roles.
+         *
+         * @param http configuración de seguridad HTTP.
+         * @return filtro de seguridad configurado.
+         * @throws Exception en caso de error de configuración.
+         */
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
                                 .csrf(csrf -> csrf.disable())
                                 .cors(Customizer.withDefaults())
-
                                 .authorizeHttpRequests(authorize -> authorize
 
-                                                // SWAGGER
-                                                .requestMatchers(
-                                                                "/swagger-ui/**",
-                                                                "/v3/api-docs/**",
+                                                // Swagger
+                                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
                                                                 "/swagger-ui.html")
                                                 .permitAll()
 
-                                                // Aqui manejaremos las rutas filtrando por .hasAuthority("ROLE_USER",
-                                                // "ROLE_ADMIN"), .permitAll() o simplemente .authenticated()
-                                                // AUTHORIZATION
+                                                // Autenticación
                                                 .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register")
                                                 .permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/auth/me", "/auth/me1", "/auth/me2")
+                                                .authenticated()
 
-                                                .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
-
-                                                // CATEGORIA
-                                                .requestMatchers(HttpMethod.GET,
-                                                                "/categorias",
-                                                                "/categorias/{id}",
+                                                // Categorías (público y admin)
+                                                .requestMatchers(HttpMethod.GET, "/categorias", "/categorias/{id}",
                                                                 "/categorias/buscar/{nombre}")
                                                 .permitAll()
-
                                                 .requestMatchers(HttpMethod.POST, "/categorias")
                                                 .hasAuthority("ROLE_ADMON")
                                                 .requestMatchers(HttpMethod.PUT, "/categorias/{id}")
@@ -70,19 +86,14 @@ public class SpringSecurityConfig {
                                                 .requestMatchers(HttpMethod.DELETE, "/categorias/{id}")
                                                 .hasAuthority("ROLE_ADMON")
 
-                                                // VACANTE // Se han añadido las rutas necesarias para hacer búsquedas
-                                                // en vacantes
+                                                // Vacantes (público, empresa)
                                                 .requestMatchers(HttpMethod.GET,
-                                                                "/vacantes",
-                                                                "/vacantes/{id}",
+                                                                "/vacantes", "/vacantes/{id}",
                                                                 "/vacantes/buscar/{nombre}",
-                                                                "/vacantes/categoria/{idCategoria}",
                                                                 "/vacantes/categoria/{idCategoria}",
                                                                 "/vacantes/salario/{salario}",
                                                                 "/vacantes/empresa/{nombre}")
-
                                                 .permitAll()
-
                                                 .requestMatchers(HttpMethod.POST, "/vacantes")
                                                 .hasAuthority("ROLE_EMPRESA")
                                                 .requestMatchers(HttpMethod.PUT, "/vacantes/{id}")
@@ -92,36 +103,27 @@ public class SpringSecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/vacantes/propias")
                                                 .hasAuthority("ROLE_EMPRESA")
 
-                                                // EMPRESA
-                                                // role_admon
-                                                .requestMatchers(HttpMethod.GET,
-                                                                "/empresas",
-                                                                "/empresas/{id}",
+                                                // Empresas (admin)
+                                                .requestMatchers(HttpMethod.GET, "/empresas", "/empresas/{id}",
                                                                 "/empresas/buscar/{nombre}")
                                                 .hasAuthority("ROLE_ADMON")
                                                 .requestMatchers(HttpMethod.POST, "/empresas/register")
                                                 .hasAuthority("ROLE_ADMON")
                                                 .requestMatchers(HttpMethod.PUT,
-                                                                "/empresas/{id}",
-                                                                "/desactivar/{id}",
-                                                                "/activar/{id}")
+                                                                "/empresas/{id}", "/desactivar/{id}", "/activar/{id}")
                                                 .hasAuthority("ROLE_ADMON")
                                                 .requestMatchers(HttpMethod.DELETE, "/empresas/{id}")
                                                 .hasAuthority("ROLE_ADMON")
                                                 .requestMatchers(HttpMethod.GET, "/empresas/desactivadas")
                                                 .hasAuthority("ROLE_ADMON")
 
-                                                // SOLICITUD
-                                                // role_user
+                                                // Solicitudes (cliente y empresa)
                                                 .requestMatchers(HttpMethod.GET, "/solicitudes/mis-solicitudes")
                                                 .hasAuthority("ROLE_CLIENTE")
-
                                                 .requestMatchers(HttpMethod.POST, "/solicitudes")
                                                 .hasAuthority("ROLE_CLIENTE")
                                                 .requestMatchers(HttpMethod.DELETE, "/solicitudes/{id}")
                                                 .hasAuthority("ROLE_CLIENTE")
-
-                                                // role_empresa
                                                 .requestMatchers(HttpMethod.GET, "/solicitudes/vacante/{idVacante}")
                                                 .hasAuthority("ROLE_EMPRESA")
                                                 .requestMatchers(HttpMethod.PUT,
@@ -129,38 +131,22 @@ public class SpringSecurityConfig {
                                                                 "/solicitudes/desadjudicar/{id}")
                                                 .hasAuthority("ROLE_EMPRESA")
 
-                                                // USUARIO
-                                                // ACTUALIZACIÓN DE PERFIL DEL USUARIO AUTENTICADO
-                                                .requestMatchers(HttpMethod.PUT,
-                                                                "/usuarios/perfil")
-                                                .authenticated()
+                                                // Usuarios (perfil y administración)
+                                                .requestMatchers(HttpMethod.PUT, "/usuarios/perfil").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/usuarios/perfil/empresa")
+                                                .hasAuthority("ROLE_EMPRESA")
                                                 .requestMatchers(HttpMethod.GET,
-                                                                "/usuarios",
-                                                                "/usuarios/{id}",
+                                                                "/usuarios", "/usuarios/{id}",
                                                                 "/usuarios/buscar/nombre/{nombre}",
                                                                 "/usuarios/buscar/rol/{rol}",
                                                                 "/usuarios/buscar/estado/{estado}")
                                                 .hasAuthority("ROLE_ADMON")
-
                                                 .requestMatchers(HttpMethod.PUT,
-                                                                "/usuarios/{id}",
-                                                                "/usuarios/{email}",
-                                                                "/usuarios/desactivar/{id}",
-                                                                "/usuarios/activar/{id}")
+                                                                "/usuarios/{id}", "/usuarios/{email}",
+                                                                "/usuarios/desactivar/{id}", "/usuarios/activar/{id}")
                                                 .hasAuthority("ROLE_ADMON")
 
-                                                .requestMatchers(HttpMethod.PUT, "/usuarios/perfil/empresa")
-                                                .hasAuthority("ROLE_EMPRESA")
-
-                                                // DATOS DEL USUARIO AUTENTICADO
-                                                .requestMatchers(HttpMethod.GET,
-                                                                "/auth/me",
-                                                                "/auth/me1",
-                                                                "/auth/me2")
-                                                .authenticated()
-
                                                 .anyRequest().authenticated())
-
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .httpBasic(Customizer.withDefaults());
@@ -168,6 +154,11 @@ public class SpringSecurityConfig {
                 return http.build();
         }
 
+        /**
+         * Configuración global de CORS para permitir peticiones desde el frontend.
+         *
+         * @return fuente de configuración CORS.
+         */
         @Bean
         CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
@@ -180,5 +171,4 @@ public class SpringSecurityConfig {
                 source.registerCorsConfiguration("/**", configuration);
                 return source;
         }
-
 }

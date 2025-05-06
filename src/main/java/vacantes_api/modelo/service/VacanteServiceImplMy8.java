@@ -11,109 +11,114 @@ import vacantes_api.modelo.entity.Vacante;
 import vacantes_api.modelo.repository.ISolicitudRepository;
 import vacantes_api.modelo.repository.IVacanteRepository;
 
+/**
+ * Implementación del servicio {@link IVacanteService} para la gestión
+ * de vacantes. Incluye lógica personalizada para cancelación lógica
+ * y eliminación de solicitudes asociadas.
+ */
 @Service
 public class VacanteServiceImplMy8 extends GenericoCRUDServiceImplMy8<Vacante, Integer> implements IVacanteService {
 
     @Autowired
     private IVacanteRepository vacanteRepository;
-    
-    @Autowired
-    private ISolicitudRepository solicitudRepository; 
 
+    @Autowired
+    private ISolicitudRepository solicitudRepository;
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected IVacanteRepository getRepository() {
         return vacanteRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Vacante> findByNombre(String nombre) {
         return vacanteRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Vacante> findByCategoriaId(Integer idCategoria) {
         return vacanteRepository.findByCategoriaIdCategoria(idCategoria);
     }
-    
-    //Añadidos:
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Vacante> findBySalario(Double salario) {
         return vacanteRepository.findBySalarioGreaterThanEqual(salario);
     }
-    
 
-	@Override
-	public List<Vacante> findByCategoriaNombre(String nombre) {
-		return vacanteRepository.findByCategoriaNombreContainingIgnoreCase(nombre);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Vacante> findByCategoriaNombre(String nombre) {
+        return vacanteRepository.findByCategoriaNombreContainingIgnoreCase(nombre);
+    }
 
-	@Override
-	public List<Vacante> findByEmpresaNombreEmpresa(String nombreEmpresa) {
-		
-		return vacanteRepository.findByEmpresaNombreEmpresaContainingIgnoreCase(nombreEmpresa);
-	}
-	
-	//Se sobreescribe el método delete del CRUD Genérico para indicar que no queremos eliminar
-	//la vacante si no cambiarle el estado a cancelada y eliminar todas las solicitudes asociadas a esta vacante
-	
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Vacante> findByEmpresaNombreEmpresa(String nombreEmpresa) {
+        return vacanteRepository.findByEmpresaNombreEmpresaContainingIgnoreCase(nombreEmpresa);
+    }
+
+    /**
+     * Sobrescribe el método delete para aplicar lógica de cancelación lógica
+     * de la vacante en lugar de eliminarla físicamente, siempre que no tenga
+     * solicitudes adjudicadas.
+     *
+     * @param id ID de la vacante.
+     */
+    @Override
     @Transactional
     public void delete(Integer id) {
-		  // Comprobamos si existe la vacante
         Vacante v = vacanteRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Vacante no encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Vacante no encontrada"));
 
-        //Si tiene al menos una solicitud adjudicada no se deja cancelar:
-        
         boolean soliAdjudicada = solicitudRepository.existsByVacanteIdVacanteAndEstado(id, 1);
-        if(soliAdjudicada) {
-        	throw new IllegalStateException(
-                    "No se puede cancelar esta vacante: existe al menos una solicitud adjudicada"
-                );
+        if (soliAdjudicada) {
+            throw new IllegalStateException(
+                    "No se puede cancelar esta vacante: existe al menos una solicitud adjudicada");
         }
-        
-        //Si no hay adjudicadas: 
-        // Se borran todas las solicitudes de esa vacante
+
         solicitudRepository.deleteByVacanteId(id);
 
-        // Se marca la vacante como CANCELADA y la guardamos
         v.setEstatus(Vacante.Estatus.CANCELADA);
         vacanteRepository.save(v);
     }
-	
-	
-	//Se sobreescribe el método update para indicar que si se modifica el estado a cancelada las solicitudes
-	// de esa vacante tambiénse eliminarán:
-	
-	 @Override
-	 @Transactional
-	 public Vacante update(Vacante nueva) {
-	        // Cargamos la vacante previa de la BBDD
-	        Vacante anterior = vacanteRepository.findById(nueva.getIdVacante())
-	            .orElseThrow(() -> new EntityNotFoundException("Vacante no encontrada"));
 
-	        // Comporbamos que la vacante anterior no tenga el estado "CANCELADA" y la nueva si lo tenga
-	        boolean pasaACancelada = 
-	             anterior.getEstatus() != Vacante.Estatus.CANCELADA
-	          && nueva.getEstatus() == Vacante.Estatus.CANCELADA;
+    /**
+     * Sobrescribe el método update para eliminar las solicitudes asociadas
+     * si el estado de la vacante cambia a "CANCELADA".
+     *
+     * @param nueva vacante con los datos actualizados.
+     * @return vacante guardada tras aplicar la actualización.
+     */
+    @Override
+    @Transactional
+    public Vacante update(Vacante nueva) {
+        Vacante anterior = vacanteRepository.findById(nueva.getIdVacante())
+                .orElseThrow(() -> new EntityNotFoundException("Vacante no encontrada"));
 
-	        if (pasaACancelada) {
-	            // Si lo anterior es true,significa que se ha cambiado el estado a "CANCELADA" y borramos todas las solicitudes asociadas a esa vacante
-	            solicitudRepository.deleteByVacanteId(nueva.getIdVacante());
-	        }
+        boolean pasaACancelada = anterior.getEstatus() != Vacante.Estatus.CANCELADA
+                && nueva.getEstatus() == Vacante.Estatus.CANCELADA;
 
-	        // Guardamos los cambios de la vacante (incluyendo el estatus)
-	        return vacanteRepository.save(nueva);
-	    }
+        if (pasaACancelada) {
+            solicitudRepository.deleteByVacanteId(nueva.getIdVacante());
+        }
 
-	 
-	 
-	/*VALORAR SI ES NECESARIO
-	 * @Override
-	public List<Vacante> findByEstado(String estado) {
-		
-		return vacanteRepository.findByEstado(estado);
-	}*/
+        return vacanteRepository.save(nueva);
+    }
 
 }

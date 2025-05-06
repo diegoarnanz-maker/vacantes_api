@@ -13,87 +13,93 @@ import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.entity.Vacante;
 import vacantes_api.modelo.repository.ISolicitudRepository;
 
+/**
+ * Implementación del servicio {@link ISolicitudService} que gestiona las
+ * operaciones
+ * de negocio relacionadas con las solicitudes de empleo.
+ */
 @Service
 public class SolicitudServiceImplMy8 extends GenericoCRUDServiceImplMy8<Solicitud, Integer>
-        implements ISolicitudService {
+		implements ISolicitudService {
 
-    @Autowired
-    private ISolicitudRepository solicitudRepository;
+	@Autowired
+	private ISolicitudRepository solicitudRepository;
 
-    @Override
-    protected ISolicitudRepository getRepository() {
-        return solicitudRepository;
-    }
+	@Override
+	protected ISolicitudRepository getRepository() {
+		return solicitudRepository;
+	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Solicitud> findByUsuarioEmail(String email) {
+		return solicitudRepository.findByUsuarioEmail(email);
+	}
 
-    @Override
-    public List<Solicitud> findByUsuarioEmail(String email) {
-        return solicitudRepository.findByUsuarioEmail(email);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Optional<Solicitud> findByVacanteAndUsuario(Vacante vacante, Usuario usuario) {
+		return solicitudRepository.findByVacanteAndUsuario(vacante, usuario);
+	}
 
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Solicitud> findByVacante(Vacante vacante) {
+		return solicitudRepository.findByVacante(vacante);
+	}
 
-    @Override
-    public Optional<Solicitud> findByVacanteAndUsuario(Vacante vacante, Usuario usuario) {
-        return solicitudRepository.findByVacanteAndUsuario(vacante, usuario);
-    }
-
-    @Override
-    public List<Solicitud> findByVacante(Vacante vacante) {
-        return solicitudRepository.findByVacante(vacante);
-    }
-
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	@Transactional
 	public void deleteByVacanteId(int vacanteId) {
-		
 		solicitudRepository.deleteByVacanteId(vacanteId);
-		
 	}
 
-
+	/**
+	 * Adjudica una solicitud (estado = 1) y marca las demás solicitudes de la
+	 * vacante como rechazadas (estado = 2).
+	 *
+	 * @param idSolicitud ID de la solicitud adjudicada.
+	 */
 	@Override
 	@Transactional
 	public void adjudicarSolicitud(int idSolicitud) {
-		//Se carga la solicitud seleccionada
-		
-		Solicitud solSelect= solicitudRepository.findById(idSolicitud)
+		Solicitud solSelect = solicitudRepository.findById(idSolicitud)
 				.orElseThrow(() -> new EntityNotFoundException("Solicitud no encontrada"));
-		
-		
-		//Se cambia el estado a adjudicada (1) y se guarda
-		
+
 		solSelect.setEstado(1);
 		solicitudRepository.save(solSelect);
-		
-		// Se rechaza al resto de solicitudes, cambiándoles el estado a = 2 (indicado en el repository)
-		
-		int vacanteId= solSelect.getVacante().getIdVacante();
-		
+
+		int vacanteId = solSelect.getVacante().getIdVacante();
 		solicitudRepository.rejectOthers(vacanteId, idSolicitud);
-		
-		
 	}
 
-
+	/**
+	 * Rechaza una solicitud y, si estaba adjudicada, restablece todas las
+	 * solicitudes de la vacante a estado pendiente (estado = 0).
+	 *
+	 * @param idSolicitud ID de la solicitud a rechazar.
+	 */
 	@Override
 	public void rechazarSolicitud(int idSolicitud) {
-		//Se carga la solicitud que se quiere rechazar
-		
-		Solicitud solicitud= solicitudRepository.findById(idSolicitud)
+		Solicitud solicitud = solicitudRepository.findById(idSolicitud)
 				.orElseThrow(() -> new EntityNotFoundException("Solicitud no encontrada"));
-		
+
 		int vacanteId = solicitud.getVacante().getIdVacante();
-		
-		//Si esta solicitud ya estaba adjudicada (estado= 1)
-		if(solicitud.getEstado()==1) {
-			solicitudRepository.resetAllEstado(vacanteId); //ponemos todas las solicitudes de esa vacante a pendiente
+
+		if (solicitud.getEstado() == 1) {
+			solicitudRepository.resetAllEstado(vacanteId);
 		}
-		
-		//Y finalmente rechazamos la solicitud seleccionada y guardamos los cambios:
+
 		solicitud.setEstado(2);
 		solicitudRepository.save(solicitud);
-		
 	}
-
 }

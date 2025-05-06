@@ -3,6 +3,7 @@ package vacantes_api.modelo.service;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,13 @@ import vacantes_api.modelo.dto.UsuarioPasswordDTO;
 import vacantes_api.modelo.entity.Usuario;
 import vacantes_api.modelo.repository.IUsuarioRepository;
 
+/**
+ * Implementación del servicio {@link IUsuarioService} que gestiona la lógica
+ * relacionada con la autenticación, registro y gestión de usuarios en la
+ * aplicación.
+ * También implementa {@link UserDetailsService} para la integración con Spring
+ * Security.
+ */
 @Service
 public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, String>
         implements IUsuarioService, UserDetailsService {
@@ -33,51 +41,61 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return usuarioRepository;
     }
 
+    /**
+     * Genera una contraseña aleatoria segura con una longitud especificada.
+     * 
+     * @param longitud número de caracteres de la contraseña.
+     * @return contraseña generada.
+     */
     private String generarPasswordAleatoria(int longitud) {
         String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        // Usamos StringBuilder para construir la contraseña carácter a carácter de
-        // forma eficiente (mejor rendimiento que concatenar strings con +)
         StringBuilder password = new StringBuilder();
-
-        // Mas seguro que Math.random() -> Genera numeros aleatorios
         SecureRandom random = new SecureRandom();
 
         for (int i = 0; i < longitud; i++) {
-
-            // Logica del algoritmo
             int index = random.nextInt(caracteres.length());
             password.append(caracteres.charAt(index));
         }
 
         return password.toString();
     }
-    
-    //AÑADIDO:
-    
-    @Override
-	public Usuario findByEmail(String email) {
-		return usuarioRepository.findById(email).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-	}
-    //-----------------
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Usuario findByEmail(String email) {
+        return usuarioRepository.findById(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Usuario> findByNombre(String nombre) {
         return usuarioRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Usuario> findByRol(String rol) {
         return usuarioRepository.findByRol(rol);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Usuario> findByEstado(Integer estado) {
         return usuarioRepository.findByEnabled(estado);
     }
 
-    // Nunca indicamos si el usuario no existe o si la contraseña es incorrecta,
-    // para evitar ataques de fuerza bruta.
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario auth(String email, String password) {
         Usuario user = usuarioRepository.findById(email)
@@ -94,13 +112,21 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return user;
     }
 
-    // Hacemos una sobrecarga del metodo register para poder registrar un usuario
-    // con rol CLIENTE o admon/empresa
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Usuario register(RegisterRequestDTO dto) {
         return this.register(dto, "CLIENTE");
     }
 
+    /**
+     * Registra un nuevo usuario con un rol específico.
+     * 
+     * @param dto objeto con los datos del nuevo usuario.
+     * @param rol rol a asignar (ej: "CLIENTE", "ADMIN", "EMPRESA").
+     * @return entidad {@link Usuario} creada.
+     */
     public Usuario register(RegisterRequestDTO dto, String rol) {
         if (usuarioRepository.existsById(dto.getEmail())) {
             throw new IllegalArgumentException("El email ya está registrado.");
@@ -119,6 +145,9 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return usuarioRepository.save(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario user = usuarioRepository.findById(email)
@@ -131,9 +160,15 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         return user;
     }
 
-    // Usamos transacciones para evitar que si falla una de las operaciones, la otra
-    // no se cree y de problemas de integridad.
-    // Si falla la creacion del usuario, no se creara la empresa y viceversa.
+    /**
+     * Registra un usuario con rol EMPRESA y devuelve la contraseña generada para su
+     * acceso.
+     * Este método es transaccional para asegurar consistencia entre usuario y
+     * empresa.
+     * 
+     * @param dto datos de la empresa y usuario.
+     * @return DTO con el usuario creado y la contraseña generada.
+     */
     @Override
     @Transactional
     public UsuarioPasswordDTO registerEmpresa(EmpresaRegisterRequestDTO dto) {
@@ -155,16 +190,15 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
 
         usuarioRepository.save(user);
 
-        // Hemos creado un dto para que el controlador pueda devolver la contraseña
-        // generada antes de ser encriptada y poder enviarsela al usuario empresa para
-        // que pueda acceder a su cuenta.
-        // Se podria hacer logica para que se le enviase esta contraseña por email.
         return UsuarioPasswordDTO.builder()
                 .usuario(user)
                 .passwordGenerada(rawPassword)
                 .build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void cambiarEstadoUsuario(String email, Integer nuevoEstado) {
         Usuario usuario = usuarioRepository.findById(email)
@@ -173,5 +207,4 @@ public class UsuarioServiceImplMy8 extends GenericoCRUDServiceImplMy8<Usuario, S
         usuario.setEnabled(nuevoEstado);
         usuarioRepository.save(usuario);
     }
-
 }
